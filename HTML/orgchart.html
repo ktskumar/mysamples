@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Organization Chart</title>
+    <style type="text/css">
+      * {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <span id="zoomValue">1</span>
+    <div id="svgContainer" style="width: 400px; height: 600px">
+      <svg
+        id="svgImage"
+        viewBox="0 0 240 280"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      ></svg>
+    </div>
+
+    <script type="text/javascript">
+      const svgImage = document.getElementById("svgImage");
+      const svgContainer = document.getElementById("svgContainer");
+      const actualsvgwidth = 240;
+      const actualsvgheight = 280;
+      var nodepositions = {};
+      var connectpathheight = 30;
+      var totalwidth = 240;
+      var totalHeight = 280;
+
+      var topwidth = 50;
+      var topheight = 70;
+      var secondboxwidth = 70;
+      var secondboxheight = 40;
+      var childheight = secondboxheight;
+      var topnodecount = 4;
+      var topnodespacing = 5;
+      var showlevels = 3;
+      var expandednodes = {};
+
+      function calcX(x) {
+        var diff = svgImage.clientWidth / actualsvgwidth;
+        return x * diff;
+      }
+
+      function calcY(y) {
+        var diff = svgImage.clientHeight / actualsvgheight;
+        return y * diff;
+      }
+
+      function hidechilds(ob) {
+        console.log(ob);
+        var currentbox = ob.split("_");
+        if (currentbox.length > 1) {
+          console.log(currentbox[1]);
+          var subchildnodes = orgjson.levels.filter(
+            (item) => item.parentid == currentbox[1]
+          );
+          var currentnode = nodepositions[currentbox[1]];
+          console.log(subchildnodes);
+          console.log(nodepositions[currentbox[1]]);
+         
+        }
+        console.log(document.querySelector("#" + ob).getAttribute("data-show"));
+
+        if (
+          document.querySelector("#" + ob).getAttribute("data-show") === "false"
+        ) {
+          console.log(document.querySelectorAll("." + ob));
+          document.querySelectorAll("." + ob).forEach((el) => {
+            el.setAttribute("style", "display:none");
+            el.remove();
+          });
+          document.querySelector("#" + ob).setAttribute("data-show", "true");
+        } else {
+          try{
+            console.log(subchildnodes);
+          expandednodes[subchildnodes[0].id].push(nodepositions[currentbox[1]]);
+          }catch(err){
+            expandednodes[subchildnodes[0].id] =[];
+            expandednodes[subchildnodes[0].id].push(nodepositions[currentbox[1]]);
+
+          }
+
+
+          document.querySelector("#" + ob).setAttribute("data-show", "false");
+          console.log(expandednodes);
+          // document.querySelectorAll("." + ob).forEach((el) => {
+          //   el.setAttribute("style", "display:block");
+          // });
+
+          var levels = subchildnodes[0];
+          var boxwidth = secondboxwidth;
+            var boxSpacing = 5;
+            console.log(firstpositionY);
+            const fX = currentnode.x + currentnode.w / 2;
+            const eX = fX;
+            var fY = 0;
+            var eY = 0;
+
+          if (levels.connect == "yes") {
+            
+
+            if (i == 1) {
+              fY = boxendY;
+              eY = boxendY + connectpathheight / 2;
+            } else {
+              fY = currentnode.y + currentnode.h;
+              eY = fY + connectpathheight / 2;
+            }
+            console.log(fY, eY);
+
+            var connectedbox = nodepositions[levels.parentid];
+
+            var connectline = "";
+
+            if (levels.parentid) {
+              connectline =
+                "<line  class='orgparent_" +
+                levels.parentid +
+                "' x1='" +
+                calcX(connectedbox.x + connectedbox.w / 2) +
+                "' y1='" +
+                calcY(connectedbox.y + connectedbox.h) +
+                "' x2='" +
+                calcX(connectedbox.x + connectedbox.w / 2) +
+                "' y2='" +
+                calcY(eY) +
+                "'style='' stroke='#FF5506' stroke-width='0.5' ></line>";
+            } else {
+              connectline =
+                "<line x1='" +
+                calcX(fX) +
+                "' y1='" +
+                calcY(fY) +
+                "' x2='" +
+                calcX(eX) +
+                "' y2='" +
+                calcY(eY) +
+                "'style='' stroke='#FF5506' stroke-width='0.5'></line>";
+            }
+            console.log(eX,eY);
+
+            pointX = findmiddleposition;
+            //middlepointX = pointX;
+            middlepointX = eX;
+            if (i == 1)
+              pointY = (firstpositionY + topheight) * i + connectpathheight;
+            else pointY = pointY + childheight + connectpathheight;
+            console.log(pointX, pointY);
+            var org_connectline = svgImage.innerHTML;
+            org_connectline += connectline;
+            svgImage.innerHTML = org_connectline;
+          }
+          org_childnodes = svgImage.innerHTML;
+         var currentchildswidth = 0;
+
+          for (var j = 0; j < levels.nodes.length; j++) {
+            var totalchildnodes = levels.nodes.length;
+            var childswidth = -1;
+            var childspacing = (totalchildnodes - 1) * boxSpacing;
+            var totalchildswidth = totalchildnodes * boxwidth;
+
+            if (j == 0) {
+              childFirstX = (totalchildswidth + childspacing) / 2;
+              pointX = pointX - childFirstX;
+            } else {
+              childFirstX = pointX;
+              pointX = pointX + boxwidth + boxSpacing;
+            }
+            pointY = eY+(connectpathheight/2);
+
+            console.log(pointX);
+            nodepositions[levels.nodes[j].id] = {
+              x: pointX,
+              y: pointY,
+              w: secondboxwidth,
+              h: secondboxheight,
+              node: levels.nodes[j],
+              parent: levels.parentid,
+            };
+            var c = generatechild(
+              pointX,
+              pointY,
+              secondboxwidth,
+              secondboxheight,
+              levels.nodes[j],
+              levels.parentid
+            );
+            boxendY = pointY;
+
+            org_childnodes += c;
+            currentchildswidth = calcX(totalchildswidth);
+          }
+          console.log(ob);
+          document.getElementById(ob).setAttribute("transform","translate("+currentchildswidth+",0)");
+          console.log(document.getElementById(ob));
+          
+          //svgImage.innerHTML = "<g>"+org_childnodes+"</g>";
+          svgImage.innerHTML = org_childnodes;
+        }
+      }
+
+      function generatetop(x, y, width, height, ob) {
+        var boxpositionX = x;
+        var boxpositionY = y;
+        var boxradius = 2.5;
+        var innerboxheight = 50;
+        var circlecenterpositionX = 25;
+        var circlecenterpositionY = 15;
+        var outerbox =
+          "<rect x='" +
+          calcX(boxpositionX) +
+          "' y='" +
+          calcY(boxpositionY) +
+          "' width='" +
+          calcX(width) +
+          "' height='" +
+          calcY(height) +
+          "' rx='2.5' ry='2.5' />";
+          //stroke='#FF5506' stroke-width='0.5'
+          var containerbox = "<foreignObject x='" +
+          calcX(boxpositionX) +
+          "' y='" +
+          calcY(boxpositionY) +
+          "' width='" +
+          calcX(width) +
+          "' height='" +
+          calcY(height) +
+          "'><div style='height:calc(100% - 2px);margin:auto;display:block;border:1px solid #FF5506;border-radius:5px;'><div style='background-color:#253645; height:70%; width:100%;background-color: #253645;border-radius:4px;'><div style='text-align:center;'><img src='"+ob.profileurl +"' style='width:32px; height:32px;border-radius:50%;padding:5px;'/></div><div style='color:#fff;text-align:center;height:40px;background-color: #253645;font-size:small;padding:0 2px'>"+ob.name+"</div></div>"+
+          "<div style='margin:auto;display:flex;height:30%'><span style='margin:auto;font-size:small'>"+ob.description+"</span></div>"+
+          "</div></foreignObject>";
+        //<path d="M0 2.5 C0 2.5 0 0 2.5 0 H 45 C47.5 0 50 0 50 2.5 V50 H0 Z" fill="#253645" />
+        //<text x="25" y="60" dominant-baseline="middle" text-anchor="middle" fill="#253645" font-weight="semi-bold" font-size=".5em">CEO</text>
+        //<circle cx="25" cy="18.75" r="12.5" fill="url(#imgcircle)"/>
+        //<text x="25" y="40" dominant-baseline="middle" text-anchor="middle" fill="white" font-weight="semi-bold" font-size=".4em">Venkatesh Maran</text>
+        var innerbox =
+          "<path d='M" +
+          calcX(boxpositionX) +
+          " " +
+          calcY(boxpositionY + boxradius) +
+          " C" +
+          calcX(boxpositionX) +
+          " " +
+          calcY(boxpositionY + boxradius) +
+          " " +
+          calcX(boxpositionX) +
+          " " +
+          calcY(boxpositionY) +
+          " " +
+          calcX(boxpositionX + boxradius) +
+          " " +
+          calcY(boxpositionY) +
+          " H " +
+          calcX(boxpositionX + width - boxradius * 2) +
+          " C" +
+          calcX(boxpositionX + width - boxradius * 2 + boxradius) +
+          " " +
+          calcY(boxpositionY) +
+          " " +
+          calcX(boxpositionX + width) +
+          " " +
+          calcY(boxpositionY) +
+          " " +
+          calcX(boxpositionX + width) +
+          " " +
+          calcY(boxpositionY + boxradius) +
+          " V" +
+          calcY(innerboxheight) +
+          " H" +
+          calcX(boxpositionX) +
+          " Z' fill='#253645' />";
+
+        var userpic = "";
+        var usercircle =
+          "<circle cx='" +
+          calcX(boxpositionX + circlecenterpositionX) +
+          "' cy='" +
+          calcY(boxpositionY + circlecenterpositionY) +
+          "' r='" +
+          calcX(12.5) +
+          "' fill='url(#imgcircle" +
+          ob.id +
+          ")'/>";
+        var username =
+          "<text x='" +
+          calcX(boxpositionX + circlecenterpositionX) +
+          "' y='" +
+          calcY(boxpositionY + innerboxheight - 10) +
+          "' dominant-baseline='middle' text-anchor='middle' fill='white' font-weight='semi-bold' font-size='.4em'>" +
+          ob.name +
+          "</text>";
+
+        username =
+          "<foreignObject x='" +
+          calcX(boxpositionX) +
+          "' y='" +
+          calcY(boxpositionY + innerboxheight - 20) +
+          "' width='" +
+          calcX(50) +
+          "' height='" +
+          calcY(20) +
+          "'><div style='font-size: 0.75em;color: #fff;inline-size: " +
+          calcX(50) +
+          "px;overflow-wrap: break-word;text-align: center;vertical-align:middle;display:inline-block'>" +
+          ob.name +
+          "</div></foreignObject>";
+        var userjob =
+          "<text x='" +
+          calcX(boxpositionX + circlecenterpositionX) +
+          "' y='" +
+          calcY(boxpositionY + innerboxheight + (height - innerboxheight) / 2) +
+          "' dominant-baseline='middle' text-anchor='middle' fill='#253645' font-weight='semi-bold' font-size='.5em'>" +
+          ob.description +
+          "</text>";
+
+        userjob =
+          "<foreignObject x='" +
+          //calcX(boxpositionX + circlecenterpositionX) +
+          calcX(boxpositionX) +
+          "' y='" +
+          calcY(boxpositionY + innerboxheight) +
+          "' width='" +
+          calcX(50) +
+          "' height='" +
+          calcY(20) +
+          "'><p style='font-size: 0.75em;color: black;inline-size: " +
+          calcX(50) +
+          "px;overflow-wrap: break-word;text-align: center;'>" +
+          ob.description +
+          "</p></foreignObject>";
+        var imgpattern =
+          "<pattern class='pattern' height='1' width='1' id='imgcircle" +
+          ob.id +
+          "'><image class='pattern-image' x='0' y='0' height='" +
+          calcY(25) +
+          "' width='" +
+          calcX(25) +
+          "'' href='" +
+          ob.profileurl +
+          "' viewbox='0 0 200 100' preserveAspectRatio='xMidYMin slice'></image></pattern>";
+        var topboxhtml =
+          "<g id='orgparent_" +
+          ob.id +
+          "'>" +
+          outerbox +
+          containerbox+
+          // innerbox +
+          // usercircle +
+          // username +
+          // userjob +
+          // userpic +
+          "<defs>" +
+          imgpattern +
+          "</defs></g>";
+
+        return topboxhtml;
+      }
+
+      function generatechild(x, y, width, height, ob, pid) {
+        var connect1 =
+          "<line x1='" +
+          calcX(x + secondboxwidth / 2) +
+          "' y1='" +
+          calcY(y - connectpathheight / 2) +
+          "' x2='" +
+          calcX(x + secondboxwidth / 2) +
+          "' y2='" +
+          calcY(y) +
+          "' style='stroke: #FF5506; stroke-width: 0.5'></line>";
+        var connect2 =
+          "<line x1='" +
+          calcX(x + secondboxwidth / 2) +
+          "' y1='" +
+          calcY(y - connectpathheight / 2) +
+          "' x2='" +
+          calcX(middlepointX) +
+          "' y2='" +
+          calcY(y - connectpathheight / 2) +
+          "' style='stroke: #FF5506; stroke-width: 0.5'></line>";
+        var outerbox =
+          "<rect x='" +
+          calcX(x) +
+          "' y='" +
+          calcY(y) +
+          "' width='" +
+          calcX(width) +
+          "' height='" +
+          calcY(height) +
+          "' rx='1' ry='1' stroke='#253645' stroke-width='0.5' />";
+        var circle ="";
+          // "<circle cx='" +
+          // calcX(x + 12) +
+          // "' cy='" +
+          // calcY(y + 16) +
+          // "' r='" +
+          // calcX(8) +
+          // "' fill='url(#imgcircle" +
+          // ob.id +
+          // ")' />";
+
+        var text =
+          "<foreignObject x='" +
+          //calcX(x + 8 + 6 + 4) +
+          calcX(x ) +
+          "' y='" +
+          calcY(y) +
+          "' width='" +
+          //calcX(secondboxwidth - 20) +
+          calcX(secondboxwidth) +
+          "' height='" +
+          calcY(secondboxheight) +
+          "' onclick='hidechilds(\"orgparent_" +
+          ob.id +
+          "\");'>";
+          text+="<div style='display:flex;height:100%; margin:auto;'><div style='margin:auto 5px;'><img src='https://ui-avatars.com/api/?background=253645&color=fff&name=" +
+          ob.name+"' style='height:32px;width:32px;border-radius:50%' /></div><div style='margin:auto 5px;'><div style='font-size:0.75rem;color:#08011E;margin:auto 5px;'>  "+ob.name+" </div><div style='color:#716E7B;margin-top:3px;margin-left:5px;font-size:0.5rem;'> "+ob.description+"</div></div></div>";
+          text+= "</foreignObject>";
+          // <p style='font-size: 0.75em;color: black;inline-size: " +
+          // calcX(50) +
+          // "px;overflow-wrap: break-word;text-align: center;vertical-align:middle;display:inline-block'>" +
+          // ob.name +
+          // "<span style='font-size: 0.75em;display: inline-block;vertical-align: sub;text-align: right;width: 100%;'>Click to see all </span></p></foreignObject>";
+
+
+
+
+        // var text =
+        //   "<text x='" +
+        //   calcX(x + 8 + 6 + 4) +
+        //   "' y='" +
+        //   calcY(y + 15) +
+        //   "' fill='black' font-size='0.75em' >" +
+        //   ob.name +
+        //   "</text>";
+        var seeall = "";
+        // "<text x='" +
+        // calcX(x + 8 + 6 + 4) +
+        // "' y='" +
+        // calcY(y + 20) +
+        // "' fill='black' font-size='0.75em' >" +
+        // ob.id +
+        // "</text>";
+
+        var pattern =
+          "<defs><pattern class='pattern' height='1' width='1' id='imgcircle" +
+          ob.id +
+          "'><image href='https://ui-avatars.com/api/?background=253645&color=fff&name=" +
+          ob.name +
+          "' x='0' y='0' height='" +
+          calcX(16) +
+          "' width='" +
+          calcX(16) +
+          "' viewbox='0 0 200 100' preserveAspectRatio='xMidYMin slice' /></pattern></defs>";
+        return (
+          "<g x='"+calcX(x) +
+          "' y='" +
+          calcY(y) +
+          "' width='" +
+          calcX(width) +
+          "' height='" +
+          calcY(height) +"' id='orgparent_"+ob.id +
+          "' data-parent='orgparent_" +
+          pid +
+          "' class='orgparent_" +
+          pid +
+          "'  data-show='false'>" +
+          connect1 +
+          connect2 +
+          // "</g><g>" +
+          outerbox +
+          circle +
+          text +
+          seeall +
+          pattern +
+          "</g>"
+        );
+      }
+
+      function getInitials(name) {
+        var parts = name.split(" ");
+        var initials = "";
+        if (parts.length > 1) {
+          for (var i = 0; i < parts.length; i++) {
+            if (parts[i].length > 0 && parts[i] !== "") {
+              initials += parts[i][0];
+            }
+          }
+        } else {
+          initials = name.slice(0, 2).toUpperCase();
+        }
+        return initials;
+      }
+      console.log(svgImage.clientWidth);
+      //var totalwidth = svgImage.clientWidth;
+      //var totalHeight = svgImage.clientHeight;
+
+      var findmiddleposition = (totalwidth / topnodecount) * 2;
+      //200
+      var additionspace = (topnodecount + 1) * topnodespacing;
+      //200+25
+      //var fistpositionX = (additionspace/2)+topnodespacing;
+      //225/2
+      //112.5
+      //var firstpositionY = 0+topnodespacing;
+      var fistpositionX = additionspace / 2;
+      var firstpositionY = 0;
+
+      var orgjson = {
+        levels: [
+          {
+            id: "level1",
+            connect: "no",
+            top: "yes",
+            nodes: [
+              {
+                id: 0,
+                name: "Harry Christiaens",
+                description: "CEO",
+                profileurl:
+                  "https://ardena.com/content/uploads/2022/12/61-Portret-Harry-Christiaens-132x132.jpg",
+              },
+              {
+                id: 1,
+                name: "Gerjan Kemperman",
+                description: "COO",
+                profileurl:
+                  "https://ardena.com/content/uploads/2022/12/63-Portret-Gerjan-Kemperman-132x132.jpg",
+              },
+              {
+                id: 2,
+                name: "Filip Van Herck",
+                description: "CFO",
+                profileurl:
+                  "https://ardena.com/content/uploads/2022/12/62-Portret-Filip-Van-Herck-132x132.jpg",
+              },
+              {
+                id: 3,
+                name: "Guido Wallraff",
+                description: "BD Director",
+                profileurl:
+                  "https://ardena.com/content/uploads/2022/12/64-Portret-Guido-Wallraff-132x132.jpg",
+              },
+            ],
+          },
+          {
+            id: "level2",
+            connect: "yes",
+            top: "no",
+            nodes: [
+              {
+                id: 4,
+                name: "Corporate",
+                description: "Click to see all >",
+              },
+            ],
+          },
+          {
+            id: "level3",
+            parentid: 4,
+            connect: "yes",
+            top: "no",
+            nodes: [
+              {
+                id: 5,
+                name: "Parm Division",
+                description: "",
+                profileurl: "",
+              },
+              {
+                id: 6,
+                name: "Chem Division",
+                description: "",
+                profileurl: "",
+              },
+              {
+                id: 7,
+                name: "Bio Division",
+                description: "Bio Division",
+                profileurl: "",
+              },
+            ],
+          },
+          {
+            id: "level4",
+            parentid: 5,
+            connect: "yes",
+            top: "no",
+            nodes: [
+              {
+                id: 8,
+                name: "Head Sales",
+                description: "Dave Seghers",
+              },
+              {
+                id: 10,
+                name: "BU DDM-BE",
+                description: "Arnout Everaert",
+              },
+              {
+                id: 11,
+                name: "BU DDM-ES",
+                description: "Jose Antonio Blanco",
+              },
+              {
+                id: 12,
+                name: "BU SMS Reg",
+                description: "Anke Moret & Julie De Smet",
+              },
+            ],
+          },
+          {
+            id: "level4",
+            parentid: 6,
+            connect: "yes",
+            top: "no",
+            nodes: [
+              {
+                id: 13,
+                name: "Head Sales",
+                description: "",
+              },
+              {
+                id: 14,
+                name: "BU API-NL",
+                description: "Dirkjan van Zoelen",
+              },
+              {
+                id: 15,
+                name: "BU Nano",
+                description: "Mark van Eldijk",
+              },
+              {
+                id: 16,
+                name: "BU SSR",
+                description: "Rene Steendam",
+              },
+              {
+                id: 17,
+                name: "BU API-SE",
+                description: "Annette Roos",
+              }
+            ],
+          },
+          {
+            id: "level4",
+            parentid: 7,
+            connect: "yes",
+            top: "no",
+            nodes: [
+              {
+                id: 18,
+                name: "Technical Sales Team",
+                description: "",
+              }
+            ]
+          },
+          {
+            id: "level5",
+            parentid: 8,
+            connect: "yes",
+            top: "no",
+            nodes: [
+              {
+                id: 19,
+                name: "Technical Sales Team",
+                description: "",
+              }
+            ]
+          },
+          {
+            id: "level5",
+            parentid: 13,
+            connect: "yes",
+            top: "no",
+            nodes: [
+              {
+                id: 20,
+                name: "Technical Sales Team",
+                description: "",
+              }
+            ]
+          }
+        ],
+      };
+
+      //  var nodejson = {
+      //   data: [],
+      //   nodes: [
+      //     {
+      //       id: 0,
+      //       name: "Venkatesh Maran",
+      //       description: "CEO",
+      //     },
+      //     {
+      //       id: 1,
+      //       name: "Shantha Kumar",
+      //       description: "CTO",
+      //     },
+      //     {
+      //       id: 2,
+      //       name: "Razia",
+      //       description: "CIO",
+      //     },
+      //     {
+      //       id: 3,
+      //       name: "Johnsi",
+      //       description: "CAO",
+      //     },
+      //   ],
+      //   node: {
+      //     id: 4,
+      //     name: "Corporate",
+      //     description: "",
+      //   },
+      // };
+
+      console.log(orgjson);
+
+      var org_a = "";
+      var org_connectline = "";
+      var org_childnodes = "";
+      var pointX = 0;
+      var pointY = 0;
+      var boxendY = 0;
+      var middlepointX = 0;
+
+      for (var i = 0; i < orgjson.levels.length; i++) {
+        if (i < showlevels) {
+          var levels = orgjson.levels[i];
+
+          if (levels.top === "yes") {
+            firstpositionY = boxendY;
+            for (var j = 0; j < levels.nodes.length; j++) {
+              var spacing = 0;
+              spacing = j * 50 + j * topnodespacing;
+              var html = generatetop(
+                fistpositionX + spacing,
+                firstpositionY,
+                topwidth,
+                topheight,
+                levels.nodes[j]
+              );
+
+              
+
+              nodepositions[levels.nodes[j].id] = {
+                x: fistpositionX + spacing,
+                y: firstpositionY,
+                w: topwidth,
+                h: topheight,
+                node: levels.nodes[j],
+              };
+              boxendY = firstpositionY + topheight;
+              org_a += html;
+            }
+          } else {
+            if (levels.connect == "yes") {
+              var boxwidth = secondboxwidth;
+              var boxSpacing = 5;
+              console.log(firstpositionY);
+              const fX = findmiddleposition;
+              const eX = findmiddleposition;
+              var fY = 0;
+              var eY = 0;
+              if (i == 1) {
+                fY = boxendY;
+                eY = boxendY + connectpathheight / 2;
+              } else {
+                fY = boxendY + childheight;
+                eY = boxendY + connectpathheight / 2 + childheight;
+              }
+
+              console.log(fY, eY);
+
+              var connectedbox = nodepositions[levels.parentid];
+
+              var connectline = "";
+
+              if (levels.parentid) {
+                connectline =
+                  "<line  class='orgparent_" +
+                  levels.parentid +
+                  "' x1='" +
+                  calcX(connectedbox.x + connectedbox.w / 2) +
+                  "' y1='" +
+                  calcY(connectedbox.y + connectedbox.h) +
+                  "' x2='" +
+                  calcX(connectedbox.x + connectedbox.w / 2) +
+                  "' y2='" +
+                  calcY(eY) +
+                  "'style='' stroke='#FF5506' stroke-width='0.5' ></line>";
+              } else {
+                connectline =
+                  "<line x1='" +
+                  calcX(fX) +
+                  "' y1='" +
+                  calcY(fY) +
+                  "' x2='" +
+                  calcX(eX) +
+                  "' y2='" +
+                  calcY(eY) +
+                  "'style='' stroke='#FF5506' stroke-width='0.5'></line>";
+              }
+
+              pointX = findmiddleposition;
+              middlepointX = pointX;
+              if (i == 1)
+                pointY = (firstpositionY + topheight) * i + connectpathheight;
+              else pointY = pointY + childheight + connectpathheight;
+              console.log(pointX, pointY);
+              org_connectline += connectline;
+            }
+            //org_childnodes += "<g>";
+
+            for (var j = 0; j < levels.nodes.length; j++) {
+              var totalchildnodes = levels.nodes.length;
+              var childswidth = -1;
+              var childspacing = (totalchildnodes - 1) * boxSpacing;
+              var totalchildswidth = totalchildnodes * boxwidth;
+
+              if (j == 0) {
+                childFirstX = (totalchildswidth + childspacing) / 2;
+                pointX = pointX - childFirstX;
+              } else {
+                childFirstX = pointX;
+                pointX = pointX + boxwidth + boxSpacing;
+              }
+
+              console.log(pointX);
+              nodepositions[levels.nodes[j].id] = {
+                x: pointX,
+                y: pointY,
+                w: secondboxwidth,
+                h: secondboxheight,
+                node: levels.nodes[j],
+                parent: levels.parentid,
+              };
+              var c = generatechild(
+                pointX,
+                pointY,
+                secondboxwidth,
+                secondboxheight,
+                levels.nodes[j],
+                levels.parentid
+              );
+              boxendY = pointY;
+
+              org_childnodes += c;
+            }
+            //org_childnodes += "</g>";
+          }
+        }
+      }
+      //console.log(org_a);
+      var a = "";
+      a = org_a;
+
+      var b = "";
+      b = "<g>" + connectline + "</g>";
+      b = "<g>" + org_connectline + "</g>";
+      c = org_childnodes;
+      svgImage.innerHTML = a + b + c;
+      console.log(nodepositions);
+      var viewBox = {
+        x: 0,
+        y: 0,
+        //w:240,
+        //h:280
+        w: svgImage.clientWidth,
+        h: svgImage.clientHeight,
+      };
+      svgImage.setAttribute(
+        "viewBox",
+        `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`
+      );
+      const svgSize = { w: svgImage.clientWidth, h: svgImage.clientHeight };
+      //const svgSize = { w: 240, h: 280 };
+      var isPanning = false;
+      var startPoint = { x: 0, y: 0 };
+      var endPoint = { x: 0, y: 0 };
+      var scale = 1;
+
+      //   svgContainer.onmousewheel = function (e) {
+      //   e.preventDefault();
+      //   var w = viewBox.w;
+      //   var h = viewBox.h;
+      //   var mx = e.offsetX; //mouse x
+      //   var my = e.offsetY;
+      //   var dw = w * Math.sign(e.deltaY) * 0.05;
+      //   var dh = h * Math.sign(e.deltaY) * 0.05;
+      //   var dx = (dw * mx) / svgSize.w;
+      //   var dy = (dh * my) / svgSize.h;
+      //   viewBox = {
+      //     x: viewBox.x + dx,
+      //     y: viewBox.y + dy,
+      //     w: viewBox.w - dw,
+      //     h: viewBox.h - dh,
+      //   };
+      //   scale = svgSize.w / viewBox.w;
+      //   zoomValue.innerText = `${Math.round(scale * 100) / 100}`;
+      //   svgImage.setAttribute(
+      //     "viewBox",
+      //     `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`
+      //   );
+      // };
+
+      svgContainer.onmousedown = function (e) {
+        isPanning = true;
+        startPoint = { x: e.x, y: e.y };
+      };
+
+      svgContainer.onmousemove = function (e) {
+        if (isPanning) {
+          endPoint = { x: e.x, y: e.y };
+          var dx = (startPoint.x - endPoint.x) / scale;
+          var dy = (startPoint.y - endPoint.y) / scale;
+          var movedViewBox = {
+            x: viewBox.x + dx,
+            y: viewBox.y + dy,
+            w: viewBox.w,
+            h: viewBox.h,
+          };
+          svgImage.setAttribute(
+            "viewBox",
+            `${movedViewBox.x} ${movedViewBox.y} ${movedViewBox.w} ${movedViewBox.h}`
+          );
+        }
+      };
+
+      svgContainer.onmouseup = function (e) {
+        if (isPanning) {
+          endPoint = { x: e.x, y: e.y };
+          var dx = (startPoint.x - endPoint.x) / scale;
+          var dy = (startPoint.y - endPoint.y) / scale;
+          viewBox = {
+            x: viewBox.x + dx,
+            y: viewBox.y + dy,
+            w: viewBox.w,
+            h: viewBox.h,
+          };
+          svgImage.setAttribute(
+            "viewBox",
+            `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`
+          );
+          isPanning = false;
+        }
+      };
+
+      svgContainer.onmouseleave = function (e) {
+        isPanning = false;
+      };
+    </script>
+  </body>
+</html>
